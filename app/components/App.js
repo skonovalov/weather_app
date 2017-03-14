@@ -1,5 +1,8 @@
 import React, {Component} from "react";
 import jsonp from "jsonp";
+import store from "store";
+
+console.log( store );
 
 import Temperature from "./Temperature";
 import City from "./City";
@@ -8,36 +11,52 @@ export default class App extends Component {
     constructor( props ) {
         super( props );
 
+	    this.cities = [];
+
         this.state = {
             city: null,
             temp: null,
             addCity: '',
-            data: ''
+            lat: '',
+	        lon: ''
         };
     }
     render() {
         return (
-            <div>
-                <City city = {this.state.city} />
-                <Temperature temp = { this.state.temp }/>
+            <div className="app">
+                <div className="app__top">
+                    <City city = { this.state.city } />
+                    <Temperature temp = { this.state.temp } />
+                </div>
 
-                <div>
-                    <input type     = "text"
-                           onChange = { this.getCity }
-                           value    = { this.state.handleCity }/>
-                    <button type="button" onClick = { this.handleAddCity } >Добавить город</button>
-                </div>
-                <div>
-                    <select name="" id="">
-                        {this.getLocalStorageKeys()}
-                    </select>
-                </div>
+               <div className="app__bottom">
+                   <div>
+                       <input type     = "text"
+                              onChange = { this.getCity }
+                              value    = { this.state.handleCity }/>
+                       <button type="button" onClick = { this.handleAddCity } >Добавить город</button>
+                   </div>
+                   <div className="select">
+	                   <select name="select"
+	                           id="select"
+	                           onChange = { this.handleSelect }>
+			                   {
+				                   this.cities.map((elem, index)=>{
+					                   return <option key={index}
+					                                  value={ elem.newKey }>{elem.newKey}</option>
+				                   })
+			                   }
+	                   </select>
+                   </div>
+               </div>
             </div>
         )
     }
 
     componentDidMount() {
         this.getLocation();
+        this.getLocalStorageKeys();
+	    console.log(this.cities);
     }
 
     getLocation = () => {
@@ -75,14 +94,13 @@ export default class App extends Component {
                 console.error('error', err.message);
             } else {
                 console.log('data', data);
-                getData(data, value);
+                getData(data);
             }
         });
 
-        function getData(data_, val){
+        function getData(data_){
             self.setState({
-                addCity: val,
-                data: [data_.name, data_.coord.lat, data_.coord.lon]
+                addCity: ' ' + data_.name
             });
 
 
@@ -90,12 +108,37 @@ export default class App extends Component {
     }
 
     handleAddCity = () => {
-        localStorage.setItem(this.state.data[0], `{lat:${this.state.data[1]}, lon: ${this.state.data[2]}}`);
+	    store.set(this.state.addCity, '');
+	    console.log('success');
     }
 
     getLocalStorageKeys = () => {
-        for(let key in localStorage) {
-           return (<option value={localStorage[key]} >{key}</option>)
-        }
+    	let self = this;
+
+        store.each(function(value, key) {
+			if( key.indexOf(' ') === -1 ) { return; }
+			let newKey = key.trim().charAt(0).toUpperCase() + key.trim().substr(1);
+
+			self.cities.push({newKey, value});
+		});
     }
+
+	handleSelect = (event) => {
+    	console.log(event);
+    	console.log('select event', event.target.value);
+    	let self = this;
+
+		jsonp(`http://api.openweathermap.org/data/2.5/weather?APPID=d7f7b34f3a9398e8e3bb85cefb767ab1&units=metric&q=${event.target.value}`, null, function (err, data) {
+			if (err) {
+				console.error('error', err.message);
+			} else {
+				console.log('data', data);
+
+				self.setState({
+					city: data.name,
+					temp: data.main.temp
+				});
+			}
+		});
+	}
 }
