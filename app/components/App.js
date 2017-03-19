@@ -1,27 +1,51 @@
 import React, {Component} from "react";
 import jsonp from "jsonp";
 import store from "store";
-
-console.log( store );
-
+import { connect } from "react-redux";
 import Temperature from "./Temperature";
 import City from "./City";
 
-export default class App extends Component {
+class App extends Component {
     constructor( props ) {
         super( props );
-
-	    this.cities = [];
-
-        this.state = {
-            city: null,
-            temp: null,
-            addCity: '',
-            lat: '',
-	        lon: ''
-        };
     }
+
     render() {
+        console.log('==render==');
+        console.log('this.props.testStore', this.props.store);
+        return (
+            <div className="app">
+                <div className="app__top">
+                    <City  />
+                    <Temperature  />
+                </div>
+
+                <div className="app__bottom">
+                    <div>
+                        <input type     = "text"
+
+                              />
+                        <button type="button"  >Добавить город</button>
+                    </div>
+                    <div className="select">
+                        {/*<select name="select"
+                                id="select"
+                                onChange = { this.handleSelect }>
+                            {
+                                this.cities.map((elem, index)=>{
+                                    return <option key={index}
+                                                   value={ elem.newKey }>{elem.newKey}</option>
+                                })
+                            }
+                        </select> */}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+    /*render() {
+        console.log('==render==');
+        console.log('this.props.testStore', this.props.testStore);
         return (
             <div className="app">
                 <div className="app__top">
@@ -33,7 +57,7 @@ export default class App extends Component {
                    <div>
                        <input type     = "text"
                               onChange = { this.getCity }
-                              value    = { this.state.handleCity }/>
+                              value    = { this.state.inputVal }/>
                        <button type="button" onClick = { this.handleAddCity } >Добавить город</button>
                    </div>
                    <div className="select">
@@ -89,6 +113,10 @@ export default class App extends Component {
         let self = this;
         let value = event.target.value;
 
+        this.setState({
+            inputVal: event.target.value
+        });
+
         jsonp(`http://api.openweathermap.org/data/2.5/weather?APPID=d7f7b34f3a9398e8e3bb85cefb767ab1&units=metric&q=${value}`, null, function (err, data) {
             if (err) {
                 console.error('error', err.message);
@@ -100,7 +128,8 @@ export default class App extends Component {
 
         function getData(data_){
             self.setState({
-                addCity: ' ' + data_.name
+                addCity: '*' + data_.name
+
             });
 
 
@@ -109,6 +138,10 @@ export default class App extends Component {
 
     handleAddCity = () => {
 	    store.set(this.state.addCity, '');
+
+	    this.setState({
+	        inputVal: ''
+        });
 	    console.log('success');
     }
 
@@ -116,15 +149,14 @@ export default class App extends Component {
     	let self = this;
 
         store.each(function(value, key) {
-			if( key.indexOf(' ') === -1 ) { return; }
-			let newKey = key.trim().charAt(0).toUpperCase() + key.trim().substr(1);
+			if( key.indexOf('*') === -1 ) { return; }
+			let newKey = key.trim().substring(1);
 
 			self.cities.push({newKey, value});
 		});
     }
 
 	handleSelect = (event) => {
-    	console.log(event);
     	console.log('select event', event.target.value);
     	let self = this;
 
@@ -140,5 +172,12 @@ export default class App extends Component {
 				});
 			}
 		});
-	}
+	}*/
 }
+
+export default connect(
+    state=>({
+        store: state
+    }),
+    dispatch=>({})
+)(App);
