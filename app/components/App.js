@@ -12,7 +12,7 @@ class App extends Component {
 
     render() {
         console.log('==render==');
-        console.log('this.props.testStore', this.props.store);
+        console.dir(this.props.store);
         return (
             <div className="app">
                 <div className="app__top">
