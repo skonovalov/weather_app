@@ -1,4 +1,6 @@
-import ACTIONS from "../constants";
+import {ACTIONS} from "../constants";
+
+console.log('ACTIONS', ACTIONS);
 
 function getCurrentCityAction(city) {
 	return {

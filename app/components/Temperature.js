@@ -6,6 +6,6 @@ import React, {Component} from "react";
 
 export default class Temperature extends Component {
     render() {
-        return <div className="temp">{this.props.temp} &deg;</div>;
+        return <div className="temp">{this.props.name} &deg;</div>;
     }
 }

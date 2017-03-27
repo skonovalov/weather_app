@@ -10,3 +10,4 @@ export const initialState = {
 	cities: []
 };
 
+export default { ACTIONS, initialState };
